@@ -202,7 +202,9 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarOpen ? 'lg:ml-5' : 'lg:ml-0'}`}>
+      <div 
+        className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isSidebarOpen ? 'lg:pl-[280px]' : 'lg:pl-0'}`}
+      >
         {/* Header */}
         <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border/50 sticky top-0 bg-background/80 backdrop-blur-md z-40">
           <div className="flex items-center gap-3">

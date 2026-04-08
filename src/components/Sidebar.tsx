@@ -68,14 +68,18 @@ export default function Sidebar({ onSelectItem, isOpen, setIsOpen }: SidebarProp
       </AnimatePresence>
 
       <motion.aside
-        initial={false}
+        initial={{ x: -280 }}
         animate={{ 
-          width: isOpen ? 280 : 0,
-          x: isOpen ? 0 : -280
+          x: isOpen ? 0 : -280,
+          opacity: 1
         }}
-        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`fixed left-0 top-0 h-screen glass-panel z-[70] flex flex-col border-r border-border transition-all duration-300 overflow-hidden lg:relative lg:translate-x-0 ${isOpen ? 'w-[280px]' : 'w-0 lg:w-20'}`}
-        style={{ x: 0 }} // Reset x for Desktop if needed, but the animate handles it
+        transition={{ 
+          type: 'spring', 
+          damping: 30, 
+          stiffness: 300,
+          mass: 0.8
+        }}
+        className="fixed left-0 top-0 h-screen w-[280px] glass-panel z-[70] flex flex-col border-r border-border shadow-2xl lg:shadow-none overflow-hidden"
       >
         <div className="p-4 flex items-center justify-between border-b border-border h-20 shrink-0">
           <motion.h2 
