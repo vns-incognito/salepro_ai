@@ -9,13 +9,14 @@ import EmailGrid from '@/components/EmailGrid';
 import OnboardingModal from '@/components/OnboardingModal';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, LayoutDashboard } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Menu, X } from 'lucide-react';
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [currentData, setCurrentData] = useState<any>(null);
   const [session, setSession] = useState<any>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -185,8 +186,12 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-foreground flex">
-      <Sidebar onSelectItem={handleSelectHistory} />
+    <main className="min-h-screen bg-background text-foreground flex overflow-hidden">
+      <Sidebar 
+        onSelectItem={handleSelectHistory} 
+        isOpen={isSidebarOpen} 
+        setIsOpen={setIsSidebarOpen} 
+      />
       
       <AnimatePresence>
         {showOnboarding && session?.user && (
@@ -197,20 +202,28 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <div className="flex-1 flex flex-col pl-20 lg:pl-0 ml-0 lg:ml-20 transition-all duration-300">
+      <div className={`flex-1 flex flex-col min-w-0 transition-all duration-300 ${isSidebarOpen ? 'lg:ml-5' : 'lg:ml-0'}`}>
         {/* Header */}
-        <header className="h-20 flex items-center justify-between px-8 border-b border-border/50 sticky top-0 bg-background/80 backdrop-blur-md z-40">
-          <div className="flex items-center gap-2">
-             <div className="w-10 h-10 rounded-xl gemini-gradient flex items-center justify-center">
-                <Sparkles size={24} className="text-white" />
+        <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border/50 sticky top-0 bg-background/80 backdrop-blur-md z-40">
+          <div className="flex items-center gap-3">
+             <button 
+               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+               className="p-2 hover:bg-zinc-800 rounded-xl transition-colors"
+             >
+                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+             </button>
+             <div className="flex items-center gap-2">
+                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl gemini-gradient flex items-center justify-center">
+                   <Sparkles size={18} className="text-white md:size-24" />
+                </div>
+                <h1 className="text-lg md:text-xl font-bold tracking-tight">SalePro</h1>
              </div>
-             <h1 className="text-xl font-bold tracking-tight">SalePro</h1>
           </div>
           <AuthButton />
         </header>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
+        <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto">
           <AnimatePresence mode="wait">
             {!isLoading && !currentData ? (
               <motion.div

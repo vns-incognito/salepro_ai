@@ -48,7 +48,18 @@ export default function AuthPage() {
       }
       router.push('/');
     } catch (err: any) {
-      setError(err.message);
+      console.error('Auth error:', err);
+      
+      // Handle the "User already registered" case specifically
+      if (err.message?.toLowerCase().includes('user already registered') || 
+          err.message?.toLowerCase().includes('already exists')) {
+        setError("You already have an account! Please log in instead.");
+        setIsLogin(true); // Automatically switch to Login tab
+      } else if (err.message?.toLowerCase().includes('rate limit')) {
+        setError("Rate limit exceeded. Please wait a few minutes or disable 'Confirm Email' in Supabase.");
+      } else {
+        setError(err.message || "An unexpected error occurred.");
+      }
     } finally {
       setLoading(false);
     }
