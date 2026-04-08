@@ -74,15 +74,18 @@ export default function Home() {
           
           const { data: { session } } = await supabase.auth.getSession();
           
-          // Verify this hunt belongs to the current user
-          if (payload.new.user_id === session?.user?.id) {
-            console.log('✅ Realtime: Matching data received for user!', payload.new);
+          // Verify this hunt belongs to the current user (or is a Guest mission)
+          const isUserMatch = session?.user?.id && payload.new.user_id === session.user.id;
+          const isGuestMatch = !session?.user && !payload.new.user_id;
+
+          if (isUserMatch || isGuestMatch) {
+            console.log('✅ Realtime: Matching data received!', payload.new);
             setCurrentData(payload.new);
             setIsLoading(false);
           } else {
             console.log('⏳ Realtime: Data received but user_id mismatch.', { 
                 payloadId: payload.new.user_id, 
-                currentId: session?.user?.id 
+                currentId: session?.user?.id || 'Guest'
             });
           }
         }
@@ -108,7 +111,7 @@ export default function Home() {
         console.warn('Loading timed out after 90 seconds.');
         setIsLoading(false);
         if (!currentData) {
-          alert('Mission took too long. Please check your Supabase "hunts" table to see if data arrived, and ensure Realtime is enabled in the Supabase Dashboard.');
+          alert('Server timed out, please try again after some time.');
         }
       }, 90000); // 90 second timeout
     }
