@@ -32,6 +32,18 @@ export default function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
+        // 1. Double-Check existence using the Power Checker (RPC)
+        const { data: userExists } = await supabase
+          .rpc('check_user_exists', { target_email: email.trim().toLowerCase() });
+
+        if (userExists) {
+          setError("You already have an account! Please log in instead.");
+          setIsLogin(true);
+          setLoading(false);
+          return;
+        }
+
+        // 2. Proceed with signUp if not found
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
