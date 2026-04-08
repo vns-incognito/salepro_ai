@@ -7,6 +7,7 @@ import AuthButton from '@/components/AuthButton';
 import SearchInput from '@/components/SearchInput';
 import EmailGrid from '@/components/EmailGrid';
 import OnboardingModal from '@/components/OnboardingModal';
+import PlansModal from '@/components/PlansModal';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, LayoutDashboard, Menu, X } from 'lucide-react';
@@ -17,6 +18,7 @@ export default function Home() {
   const [session, setSession] = useState<any>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [showPlans, setShowPlans] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -72,9 +74,9 @@ export default function Home() {
         { event: 'INSERT', schema: 'public', table: 'hunts' },
         async (payload) => {
           console.log('📡 Realtime: Event received!', payload.new);
-          
+
           const { data: { session } } = await supabase.auth.getSession();
-          
+
           // Verify this hunt belongs to the current user (or is a Guest mission)
           const isUserMatch = session?.user?.id && payload.new.user_id === session.user.id;
           const isGuestMatch = !session?.user && !payload.new.user_id;
@@ -84,9 +86,9 @@ export default function Home() {
             setCurrentData(payload.new);
             setIsLoading(false);
           } else {
-            console.log('⏳ Realtime: Data received but user_id mismatch.', { 
-                payloadId: payload.new.user_id, 
-                currentId: session?.user?.id || 'Guest'
+            console.log('⏳ Realtime: Data received but user_id mismatch.', {
+              payloadId: payload.new.user_id,
+              currentId: session?.user?.id || 'Guest'
             });
           }
         }
@@ -147,7 +149,7 @@ export default function Home() {
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
-        
+
         if (!searchError && existingHunt) {
           console.log('✅ Found existing hunt in database, skipping webhook.');
           setCurrentData(existingHunt);
@@ -166,7 +168,7 @@ export default function Home() {
       const response = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           url,
           userId: session?.user?.id || null,
           userName: session?.user?.user_metadata?.full_name || 'Guest',
@@ -187,39 +189,45 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-background text-foreground flex overflow-hidden">
-      <Sidebar 
-        onSelectItem={handleSelectHistory} 
-        isOpen={isSidebarOpen} 
-        setIsOpen={setIsSidebarOpen} 
+      <Sidebar
+        onSelectItem={handleSelectHistory}
+        onUpgradeClick={() => setShowPlans(true)}
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
       />
-      
+
+      <PlansModal 
+        isOpen={showPlans} 
+        onClose={() => setShowPlans(false)} 
+      />
+
       <AnimatePresence>
         {showOnboarding && session?.user && (
-          <OnboardingModal 
-            userId={session.user.id} 
-            onComplete={() => setShowOnboarding(false)} 
+          <OnboardingModal
+            userId={session.user.id}
+            onComplete={() => setShowOnboarding(false)}
           />
         )}
       </AnimatePresence>
 
-      <div 
+      <div
         className={`flex-1 flex flex-col min-w-0 transition-all duration-500 ease-in-out ${isSidebarOpen ? 'lg:pl-[280px]' : 'lg:pl-0'}`}
       >
         {/* Header */}
         <header className="h-20 flex items-center justify-between px-4 md:px-8 border-b border-border/50 sticky top-0 bg-background/80 backdrop-blur-md z-40">
           <div className="flex items-center gap-3">
-             <button 
-               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-               className="p-2 hover:bg-zinc-800 rounded-xl transition-colors"
-             >
-                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
-             </button>
-             <div className="flex items-center gap-2">
-                <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl gemini-gradient flex items-center justify-center">
-                   <Sparkles size={18} className="text-white md:size-24" />
-                </div>
-                <h1 className="text-lg md:text-xl font-bold tracking-tight">SalePro</h1>
-             </div>
+            <button
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="p-2 hover:bg-zinc-800 rounded-xl transition-colors"
+            >
+              {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl gemini-gradient flex items-center justify-center">
+                <Sparkles size={18} className="text-white md:size-24" />
+              </div>
+              <h1 className="text-lg md:text-xl font-bold tracking-tight">SalePro</h1>
+            </div>
           </div>
           <AuthButton />
         </header>

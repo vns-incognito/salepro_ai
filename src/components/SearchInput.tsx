@@ -12,9 +12,15 @@ interface SearchInputProps {
 export default function SearchInput({ onSearch, isLoading }: SearchInputProps) {
   const [url, setUrl] = useState('');
 
+  const isValidDomain = (val: string) => {
+    // Simple regex to check for domain structure (something.something)
+    const domainRegex = /^(?:https?:\/\/)?(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
+    return domainRegex.test(val.trim());
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (url.trim() && !isLoading) {
+    if (isValidDomain(url) && !isLoading) {
       // Ensure there's a basic URL structure before sending
       const cleanUrl = url.trim().toLowerCase();
       onSearch(cleanUrl);
@@ -33,7 +39,7 @@ export default function SearchInput({ onSearch, isLoading }: SearchInputProps) {
           type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
-          placeholder="Enter company URL..."
+          placeholder="Enter company URL with vaild domain ( .com  .in  .org etc)"
           disabled={isLoading}
           className="w-full h-14 md:h-16 px-6 md:px-8 pr-16 md:pr-20 bg-zinc-900/50 border border-zinc-800 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 rounded-xl md:rounded-2xl outline-none text-zinc-100 placeholder:text-zinc-600 transition-all text-base md:text-lg glass-panel backdrop-blur-xl"
         />
@@ -41,16 +47,20 @@ export default function SearchInput({ onSearch, isLoading }: SearchInputProps) {
         <div className="absolute right-2 md:right-3 flex items-center gap-2">
           {url && (
             <motion.button
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               type="submit"
-              disabled={isLoading}
-              className="p-2 md:p-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg md:rounded-xl transition-all shadow-lg shadow-blue-500/20 disabled:opacity-50"
+              disabled={isLoading || !isValidDomain(url)}
+              className={`p-3 rounded-xl md:rounded-2xl transition-all shadow-lg flex items-center justify-center shrink-0 h-10 w-10 md:h-12 md:w-12 ${
+                isValidDomain(url) 
+                ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/20' 
+                : 'bg-zinc-800 text-zinc-500 cursor-not-allowed opacity-50 shadow-none'
+              }`}
             >
               {isLoading ? (
-                <Loader2 size={20} className="animate-spin md:size-24" />
+                <Loader2 size={18} className="animate-spin md:size-20" />
               ) : (
-                <Send size={20} className="md:size-24" />
+                <Send size={18} className="md:size-20" />
               )}
             </motion.button>
           )}

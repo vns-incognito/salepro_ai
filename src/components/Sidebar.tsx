@@ -7,11 +7,12 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 interface SidebarProps {
   onSelectItem?: (item: any) => void;
+  onUpgradeClick?: () => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export default function Sidebar({ onSelectItem, isOpen, setIsOpen }: SidebarProps) {
+export default function Sidebar({ onSelectItem, onUpgradeClick, isOpen, setIsOpen }: SidebarProps) {
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function Sidebar({ onSelectItem, isOpen, setIsOpen }: SidebarProp
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false })
         .limit(20);
-      
+
       if (!error && data) {
         setHistory(data);
       }
@@ -35,9 +36,9 @@ export default function Sidebar({ onSelectItem, isOpen, setIsOpen }: SidebarProp
 
     const channel = supabase
       .channel('hunts-history')
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
         table: 'hunts'
       }, async (payload) => {
         const { data: { session } } = await supabase.auth.getSession();
@@ -69,26 +70,26 @@ export default function Sidebar({ onSelectItem, isOpen, setIsOpen }: SidebarProp
 
       <motion.aside
         initial={{ x: -280 }}
-        animate={{ 
+        animate={{
           x: isOpen ? 0 : -280,
           opacity: 1
         }}
-        transition={{ 
-          type: 'spring', 
-          damping: 30, 
+        transition={{
+          type: 'spring',
+          damping: 30,
           stiffness: 300,
           mass: 0.8
         }}
         className="fixed left-0 top-0 h-screen w-[280px] glass-panel z-[70] flex flex-col border-r border-border shadow-2xl lg:shadow-none overflow-hidden"
       >
         <div className="p-4 flex items-center justify-between border-b border-border h-20 shrink-0">
-          <motion.h2 
+          <motion.h2
             animate={{ opacity: isOpen ? 1 : 0 }}
             className="text-lg font-black bg-gradient-to-r from-blue-400 to-cyan-300 bg-clip-text text-transparent whitespace-nowrap"
           >
             Mission History
           </motion.h2>
-          <button 
+          <button
             onClick={() => setIsOpen(false)}
             className="p-2 hover:bg-zinc-800 rounded-lg transition-colors lg:hidden"
           >
@@ -103,7 +104,7 @@ export default function Sidebar({ onSelectItem, isOpen, setIsOpen }: SidebarProp
             </div>
           ) : (
             history.map((item) => (
-              <div 
+              <div
                 key={item.id}
                 onClick={() => {
                   onSelectItem?.(item);
@@ -126,14 +127,17 @@ export default function Sidebar({ onSelectItem, isOpen, setIsOpen }: SidebarProp
         </div>
 
         <div className="p-4 border-t border-border bg-zinc-950/20">
-          <div className="flex items-center gap-3 bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800/50">
-             <div className="w-10 h-10 rounded-xl gemini-gradient flex items-center justify-center text-white shadow-lg shadow-blue-500/10">
-                <Target size={20} />
-             </div>
-             <div className="text-xs">
-                <p className="font-black text-white">Elite Plan</p>
-                <p className="text-zinc-500 font-medium">Unlimited Hunts</p>
-             </div>
+          <div 
+            onClick={onUpgradeClick}
+            className="flex items-center gap-3 bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800/50 hover:bg-zinc-800 hover:border-zinc-700 cursor-pointer transition-all active:scale-95 group"
+          >
+            <div className="w-10 h-10 rounded-xl gemini-gradient flex items-center justify-center text-white shadow-lg shadow-blue-500/10 group-hover:scale-110 transition-transform">
+              <Target size={20} />
+            </div>
+            <div className="text-xs">
+              <p className="font-black text-white">Elite Plan</p>
+              <p className="text-zinc-500 font-medium whitespace-nowrap">Upgrade to Maxx</p>
+            </div>
           </div>
         </div>
       </motion.aside>
