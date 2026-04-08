@@ -28,17 +28,14 @@ export default function SearchInput({ onSearch, isLoading }: SearchInputProps) {
         onSubmit={handleSubmit}
         className="relative flex items-center group"
       >
-        <div className="absolute left-4 md:left-6 text-zinc-500 group-focus-within:text-blue-400 transition-colors">
-          <Globe size={18} className="md:size-20" />
-        </div>
-        
+        {/* Icon removed */}
         <input
           type="text"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           placeholder="Enter company URL..."
           disabled={isLoading}
-          className="w-full h-14 md:h-16 pl-12 md:pl-14 pr-16 md:pr-20 bg-zinc-900/50 border border-zinc-800 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 rounded-xl md:rounded-2xl outline-none text-zinc-100 placeholder:text-zinc-600 transition-all text-base md:text-lg glass-panel backdrop-blur-xl"
+          className="w-full h-14 md:h-16 px-6 md:px-8 pr-16 md:pr-20 bg-zinc-900/50 border border-zinc-800 focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 rounded-xl md:rounded-2xl outline-none text-zinc-100 placeholder:text-zinc-600 transition-all text-base md:text-lg glass-panel backdrop-blur-xl"
         />
 
         <div className="absolute right-2 md:right-3 flex items-center gap-2">

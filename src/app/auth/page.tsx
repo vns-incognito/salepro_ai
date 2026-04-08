@@ -32,7 +32,7 @@ export default function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -42,9 +42,16 @@ export default function AuthPage() {
           }
         });
         if (error) throw error;
+
+        // If 'Confirm Email' is OFF in Supabase, data.session will exist
+        if (data.session) {
+          router.push('/');
+          return;
+        }
+
         setSuccess(true);
         setLoading(false);
-        return; // Don't redirect yet
+        return;
       }
       router.push('/');
     } catch (err: any) {
@@ -62,6 +69,21 @@ export default function AuthPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkEmailExists = async (email: string) => {
+    if (!email || isLogin) return; // Only check during Signup
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', email.trim().toLowerCase())
+      .maybeSingle();
+
+    if (data) {
+      setError("This email is already registered. Please log in!");
+      setIsLogin(true); // Automatically switch to Login
     }
   };
 
@@ -152,6 +174,7 @@ export default function AuthPage() {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        onBlur={(e) => checkEmailExists(e.target.value)}
                         placeholder="name@company.com"
                         className="w-full bg-zinc-900 border border-zinc-800 rounded-xl py-3 pl-12 pr-4 text-white placeholder:text-zinc-600 focus:border-blue-500 outline-none transition-all"
                       />

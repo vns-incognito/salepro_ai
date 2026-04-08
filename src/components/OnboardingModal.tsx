@@ -15,12 +15,16 @@ export default function OnboardingModal({ onComplete, userId }: OnboardingModalP
   const [organization, setOrganization] = useState('');
   const [role, setRole] = useState('');
   const [fullName, setFullName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
 
   useState(() => {
     // Initial fetch of user metadata if available
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user?.user_metadata?.full_name) {
         setFullName(user.user_metadata.full_name);
+      }
+      if (user?.email) {
+        setUserEmail(user.email);
       }
     });
   });
@@ -44,6 +48,7 @@ export default function OnboardingModal({ onComplete, userId }: OnboardingModalP
         .upsert({
           id: userId,
           full_name: fullName,
+          email: userEmail,
           organization,
           role,
           updated_at: new Date().toISOString(),
